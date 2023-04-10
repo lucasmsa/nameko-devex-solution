@@ -12,7 +12,7 @@ $ npm run dev
 $ npm run test
 ```
 
-* Notice that for the application to be ran correctly, the microservices must be running. If you have any problems running the microservices application, please refer to Any doubts about how to run the microservices locally, please refer to [running microservices application using Docker](https://github.com/gitricko/nameko-devex/blob/master/README.md) or
+* Notice that for the application to be ran correctly, the microservices must be running. If you have any problems running the microservices application, please refer to: [running microservices application using Docker](https://github.com/gitricko/nameko-devex/blob/master/README.md) or
 [using Conda](https://github.com/gitricko/nameko-devex/blob/master/README-DevEnv.md)
 
 
