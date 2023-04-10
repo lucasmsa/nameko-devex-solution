@@ -1,6 +1,8 @@
 *.egg-info
 .cache
 *.pyc
+node_modules
+.svelte-kit
 **/__pycache__
 htmlcov
 .coverage

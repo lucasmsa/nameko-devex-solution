@@ -1,0 +1,58 @@
+@import '@fontsource/fira-mono';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	input[type='number']::-webkit-inner-spin-button,
+	input[type='number']::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	html {
+		@apply text-darkViolet;
+	}
+
+	.text-label {
+		@apply text-base font-amplitudeWide font-medium;
+	}
+
+	.btn-primary {
+		@apply outline-none rounded-full py-3 px-5 uppercase font-inter border-darkViolet border-solid bg-[#745CF1] text-white shadow-xl;
+	}
+
+	.btn-outline {
+		@apply outline-none rounded-full py-3 px-10 uppercase font-inter border-darkViolet border-solid border-[1px] text-darkViolet;
+	}
+
+	@font-face {
+		font-family: 'Amplitude Wide';
+		src: local('Amplitude-Wide'), local('amplitude-wide'),
+			url('/fonts/amplitude-wide/amplitude-wide-regular.ttf');
+		font-weight: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Amplitude Wide';
+		src: local('Amplitude-Wide-Medium'), local('amplitude-wide-medium'),
+			url('/fonts/amplitude-wide/amplitude-wide-medium.ttf');
+		font-weight: medium;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Inter';
+		src: local('Inter-Medium'), local('inter-medium'),
+			url('/fonts/inter/Inter-Medium.ttf');
+		font-weight: medium;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Amplitude Wide Book';
+		src: local('Amplitude-Wide-Book'), local('amplitude-wide-book'),
+			url('/fonts/amplitude-wide-book/amplitude-wide-book.ttf');
+		font-weight: normal;
+		font-display: swap;
+	}
+}
