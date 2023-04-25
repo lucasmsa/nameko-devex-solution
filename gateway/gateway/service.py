@@ -1,5 +1,5 @@
 import json
-
+import math
 from marshmallow import ValidationError
 from nameko import config
 from nameko.exceptions import BadRequest
@@ -49,9 +49,10 @@ class GatewayService(object):
         products = self.products_rpc.list(filter_title_term=filter_title_term, page=page, per_page=per_page)
         
         response_data = {
-            'products': ProductSchema(many=True).dump(products).data,
+            'products': ProductSchema(many=True).dump(products['products']).data,
             'page': page,
-            'per_page': per_page
+            'per_page': per_page,
+            'total_products': products['total_products']
         }
         
         return Response(
@@ -59,6 +60,27 @@ class GatewayService(object):
             mimetype='application/json'
         )
 
+    @http("GET", "/orders", expected_exceptions=OrderNotFound)
+    def get_orders(self, request):
+        req = Request(request.environ)
+
+        page = int(req.args.get('page', 1))
+        per_page = int(req.args.get('per_page', 10))
+
+        orders = self.orders_rpc.list_orders(page=page, per_page=per_page)
+
+        response_data = {
+            'orders': orders['orders'],
+            'page': orders['page'],
+            'per_page': orders['per_page'],
+            'total_orders': orders['total_orders'],
+        }
+
+        return Response(
+            json.dumps(response_data),
+            mimetype='application/json'
+        )
+    
     @http(
         "GET", "/products/<string:product_id>",
         expected_exceptions=ProductNotFound
@@ -174,8 +196,11 @@ class GatewayService(object):
         # raise``OrderNotFound``
         order = self.orders_rpc.get_order(order_id)
 
+        product_ids = [item['product_id'] for item in order['order_details']]
+        products = self.products_rpc.list(product_ids=product_ids)['products']
+        
         # Retrieve all products from the products service
-        product_map = {prod['id']: prod for prod in self.products_rpc.list()}
+        product_map = {prod['id']: prod for prod in products}
 
         # get the configured image root
         image_root = config['PRODUCT_IMAGE_ROOT']
@@ -238,7 +263,8 @@ class GatewayService(object):
 
     def _create_order(self, order_data):
         # check order product ids are valid
-        valid_product_ids = {prod['id'] for prod in self.products_rpc.list()}
+        products = self.products_rpc.list(per_page=None)['products']
+        valid_product_ids = {prod['id'] for prod in products}
         for item in order_data['order_details']:
             if item['product_id'] not in valid_product_ids:
                 raise ProductNotFound(

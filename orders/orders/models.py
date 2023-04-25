@@ -28,7 +28,7 @@ class Order(DeclarativeBase):
     __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-
+    
 
 class OrderDetail(DeclarativeBase):
     __tablename__ = "order_details"

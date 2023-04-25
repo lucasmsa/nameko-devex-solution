@@ -47,8 +47,10 @@ class StorageWrapper:
         else:
             return self._from_hash(product)
 
-    def list(self, filter_title_term='', page=1, per_page=10):
-        keys = self.client.keys(self._format_key('*'))
+    def list(self, product_ids=None, filter_title_term='', page=1, per_page=10):
+        keys = [self._format_key(product_id) for product_id in product_ids] \
+            if product_ids \
+                else self.client.keys(self._format_key('*'))
 
         filtered_keys = []
         if filter_title_term:
@@ -60,12 +62,20 @@ class StorageWrapper:
         else:
             filtered_keys = keys
 
-        start = (page - 1) * per_page
-        end = start + per_page
-        paginated_keys = filtered_keys[start:end]
+        total_products = len(filtered_keys)
 
-        for key in paginated_keys:
-            yield self._from_hash(self.client.hgetall(key))
+        if page and per_page:
+            start = (page - 1) * per_page
+            end = start + per_page
+            paginated_keys = filtered_keys[start:end]
+        else: 
+            paginated_keys = filtered_keys
+
+        def product_generator():
+            for key in paginated_keys:
+                yield self._from_hash(self.client.hgetall(key))
+
+        return product_generator(), total_products
 
     def create(self, product):
         self.client.hmset(
