@@ -4,7 +4,7 @@ from marshmallow import ValidationError
 from nameko import config
 from nameko.exceptions import BadRequest
 from nameko.rpc import RpcProxy
-from werkzeug import Response
+from werkzeug import Request, Response
 
 from gateway.entrypoints import http
 from gateway.exceptions import OrderNotFound, ProductNotFound
@@ -23,11 +23,39 @@ class GatewayService(object):
     
     @http("GET", "/products", expected_exceptions=ProductNotFound)
     def get_products(self, request):
-        """Gets all products.
+        """Gets a list of products with optional filtering and pagination.
+        
+        These functionalities are exposed as query parameters, e.g.:
+        
+        Example request ::
+            
+            ?page=2&per_page=5&filter=odyssey
+            
+        The response contains a list of products, its page and the number of items per page in a json document ::
+
+            {
+                products: [...] # list of products
+                page: 2,
+                per_page: 5
+            }
+            
         """
-        products = self.products_rpc.list()
+        req = Request(request.environ)
+        
+        filter_title_term = req.args.get('filter', '')
+        page = int(req.args.get('page', 1))
+        per_page = int(req.args.get('per_page', 10))
+        
+        products = self.products_rpc.list(filter_title_term=filter_title_term, page=page, per_page=per_page)
+        
+        response_data = {
+            'products': ProductSchema(many=True).dump(products).data,
+            'page': page,
+            'per_page': per_page
+        }
+        
         return Response(
-            ProductSchema(many=True).dumps(products).data,
+            json.dumps(response_data),
             mimetype='application/json'
         )
 

@@ -2,7 +2,6 @@ import logging
 
 from nameko.events import event_handler
 from nameko.rpc import rpc
-from products.exceptions import NotFound
 from products import dependencies, schemas
 
 
@@ -21,8 +20,8 @@ class ProductsService:
         return schemas.Product().dump(product).data
 
     @rpc
-    def list(self, filters=None, page=1, page_size=10):
-        products = self.storage.list(page, page_size)
+    def list(self, filter_title_term='', page=1, per_page=10):
+        products = self.storage.list(filter_title_term, page, per_page)
         return schemas.Product(many=True).dump(products).data
 
     @rpc
