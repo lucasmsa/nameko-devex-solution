@@ -53,6 +53,7 @@ class TestCreateProduct(object):
         )
         assert response.status_code == 200
         assert response.json() == {'id': 'the_odyssey'}
+        
         assert gateway_service.products_rpc.create.call_args_list == [call({
                 "in_stock": 10,
                 "maximum_speed": 5,
@@ -60,7 +61,7 @@ class TestCreateProduct(object):
                 "passenger_capacity": 101,
                 "title": "The Odyssey"
             })]
-
+        
     def test_create_product_fails_with_invalid_json(
         self, gateway_service, web_session
     ):
@@ -80,6 +81,23 @@ class TestCreateProduct(object):
         assert response.status_code == 400
         assert response.json()['error'] == 'VALIDATION_ERROR'
 
+class TestDeleteProduct(object):
+    def test_can_delete_product(self, gateway_service, web_session):
+        response = web_session.delete('/products/the_odyssey')
+        assert response.status_code == 204
+        assert gateway_service.products_rpc.delete.call_args_list == [
+            call("the_odyssey")
+        ]
+
+    def test_product_not_found_on_delete(self, gateway_service, web_session):
+        gateway_service.products_rpc.delete.side_effect = (
+            ProductNotFound('missing'))
+
+        response = web_session.delete('/products/foo')
+        assert response.status_code == 404
+        payload = response.json()
+        assert payload['error'] == 'PRODUCT_NOT_FOUND'
+        assert payload['message'] == 'missing'
 
 class TestGetOrder(object):
 
