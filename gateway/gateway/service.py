@@ -8,7 +8,7 @@ from werkzeug import Response
 
 from gateway.entrypoints import http
 from gateway.exceptions import OrderNotFound, ProductNotFound
-from gateway.schemas import CreateOrderSchema, GetOrderSchema, ProductSchema
+from gateway.schemas import CreateOrderSchema, GetOrderSchema, ProductSchema, UpdateProductSchema
 
 
 class GatewayService(object):
@@ -20,6 +20,16 @@ class GatewayService(object):
 
     orders_rpc = RpcProxy('orders')
     products_rpc = RpcProxy('products')
+    
+    @http("GET", "/products", expected_exceptions=ProductNotFound)
+    def get_products(self, request):
+        """Gets all products.
+        """
+        products = self.products_rpc.list()
+        return Response(
+            ProductSchema(many=True).dumps(products).data,
+            mimetype='application/json'
+        )
 
     @http(
         "GET", "/products/<string:product_id>",
@@ -74,8 +84,45 @@ class GatewayService(object):
             json.dumps({'id': product_data['id']}), mimetype='application/json'
         )
         
+    # Add this method to GatewayService class
+    @http(
+        "PATCH", "/products/<string:product_id>",
+        expected_exceptions=(ValidationError, BadRequest, ProductNotFound)
+    )
+    def update_product(self, request, product_id):
+        """Update an existing product - updated product data is sent as json
+
+        Example request ::
+
+            {
+                "title": "The Updated Odyssey",
+                "passenger_capacity": 120,
+                "maximum_speed": 6,
+                "in_stock": 15
+            }
+            
+            
+        """
+
+        schema = UpdateProductSchema(strict=True)
+
+        try:
+            # load input data through a schema (for validation)
+            # Note - this may raise `ValueError` for invalid json,
+            # or `ValidationError` if data is invalid.
+            updated_product_data = schema.loads(request.get_data(as_text=True)).data
+        except ValueError as exc:
+            raise BadRequest("Invalid json: {}".format(exc))
+
+        # Update the product
+        self.products_rpc.update(product_id, updated_product_data)
+
+        return Response(status=204)  # 204 No Content indicates a successful update
+        
     @http("DELETE", "/products/<string:product_id>", expected_exceptions=ProductNotFound)
     def delete_product(self, request, product_id):
+        """Deletes an existing product by `product_id`
+        """
         self.products_rpc.delete(product_id)
         return Response(status=204)
     

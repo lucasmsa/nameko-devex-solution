@@ -2,7 +2,7 @@ import logging
 
 from nameko.events import event_handler
 from nameko.rpc import rpc
-
+from products.exceptions import NotFound
 from products import dependencies, schemas
 
 
@@ -21,8 +21,8 @@ class ProductsService:
         return schemas.Product().dump(product).data
 
     @rpc
-    def list(self):
-        products = self.storage.list()
+    def list(self, filters=None, page=1, page_size=10):
+        products = self.storage.list(page, page_size)
         return schemas.Product(many=True).dump(products).data
 
     @rpc
@@ -33,6 +33,12 @@ class ProductsService:
     @rpc
     def delete(self, product_id):
         self.storage.delete(product_id)
+        
+    @rpc
+    def update(self, product_id, updated_fields):
+        schema = schemas.UpdateProduct(strict=True)
+        valid_fields = schema.load(updated_fields).data
+        self.storage.update(product_id, valid_fields)
 
     @event_handler('orders', 'order_created')
     def handle_order_created(self, payload):

@@ -21,6 +21,9 @@ class StorageWrapper:
 
     NotFound = NotFound
 
+    def _product_not_found(self, product_id):
+        raise self.NotFound('Product ID {} does not exist'.format(product_id))
+
     def __init__(self, client):
         self.client = client
 
@@ -39,26 +42,45 @@ class StorageWrapper:
     def get(self, product_id):
         product = self.client.hgetall(self._format_key(product_id))
         if not product:
-            raise NotFound('Product ID {} does not exist'.format(product_id))
+            self._product_not_found(product_id)
         else:
             return self._from_hash(product)
 
-    def list(self):
+    def list(self, filters=None, page=1, page_size=10):
         keys = self.client.keys(self._format_key('*'))
-        for key in keys:
+        
+        if filters:
+            filtered_keys = []
+            for key in keys:
+                product = self._from_hash(self.client.hgetall(key))
+                if all(product.get(k) == v for k, v in filters.items()):
+                    filtered_keys.append(key)
+            keys = filtered_keys
+        
+        start = (page - 1) * page_size
+        end = start + page_size
+        
+        for key in keys[start:end]:
             yield self._from_hash(self.client.hgetall(key))
 
     def create(self, product):
         self.client.hmset(
             self._format_key(product['id']),
             product)
-    
+        
     def delete(self, product_id):
         key = self._format_key(product_id)
         if not self.client.exists(key):
-            raise NotFound('Product ID {} does not exist'.format(product_id))
+            self._product_not_found(product_id)
         else:
             self.client.delete(key)
+        
+    def update(self, product_id, updated_fields):
+        if not self.client.exists(self._format_key(product_id)):
+            raise NotFound('Product ID {} does not exist'.format(product_id))
+        else:
+            self.client.hmset(self._format_key(product_id), updated_fields)
+        
 
     def decrement_stock(self, product_id, amount):
         return self.client.hincrby(

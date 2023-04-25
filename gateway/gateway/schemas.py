@@ -11,7 +11,12 @@ class CreateOrderSchema(Schema):
     order_details = fields.Nested(
         CreateOrderDetailSchema, many=True, required=True
     )
-
+    
+class UpdateProductSchema(Schema):
+    title = fields.String(required=False)
+    passenger_capacity = fields.Integer(required=False)
+    maximum_speed = fields.Integer(required=False)
+    in_stock = fields.Integer(required=False)
 
 class ProductSchema(Schema):
     id = fields.Str(required=True)
