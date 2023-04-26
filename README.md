@@ -8,7 +8,7 @@
 
 ## ✏️ Implemented Tasks
 
-#### The files that were changed are on the `orders`, `products` and `gateway/gateway` folders, new routes, tests and extra functionalities were added to the application
+#### The files that were changed are on the `orders/`, `products/` and `gateway/gateway/` folders, as well as some tests on the root `test/` folder. New routes, tests and extra functionalities were added to the application
 
 - [x]  Enhance product service
     - Add a `Patch` method
