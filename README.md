@@ -24,7 +24,7 @@
 
 * [x] Enhance order service
     * Classes were organized in a different manner, adding an `OrderServiceMixin` and `OrderDetailServiceMixin` to the `OrdersService`
-    * Implemented a caching system using `lru_cache` for the
+    * Implemented LRU cache to the `get` method
     * Adjusted the `_create_order` method, calling the `get` method instead of listing products
     * The same was done for the `_get_order` method, calling only the `get` method, boosting the application's performance
 * [x] List orders rpc call
