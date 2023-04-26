@@ -1,5 +1,6 @@
 import re
 from nameko import config
+from functools import lru_cache
 from nameko.extensions import DependencyProvider
 import redis
 
@@ -40,6 +41,7 @@ class StorageWrapper:
             'in_stock': int(document[b'in_stock'])
         }
 
+    @lru_cache(maxsize=128)
     def get(self, product_id):
         product = self.client.hgetall(self._format_key(product_id))
         if not product:
