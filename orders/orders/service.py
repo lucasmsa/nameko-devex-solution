@@ -94,5 +94,7 @@ class OrdersService(OrderServiceMixin, OrderDetailServiceMixin):
     @rpc
     def delete_order(self, order_id):
         order = self._get_order(order_id)
+        for order_detail in order.order_details:
+            self.db.delete(order_detail)
         self.db.delete(order)
         self.db.commit()

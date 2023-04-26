@@ -90,7 +90,7 @@ scenarios:
       then:
         - action: continue
   
-    # 4. Get Orders
+    # 4. Get Order
     - url: /orders/${order_id}
       label: order-get
       think-time: uniform(0s, 0s)
@@ -109,7 +109,38 @@ scenarios:
       then:
         - action: continue
 
-    # 5. Delete Product
+    # 5. List Orders
+    - url: /orders
+      label: orders-list
+      think-time: uniform(0s, 0s)
+      method: GET
+
+      assert:
+      - contains:
+        - 200
+        subject: http-code
+        not: false
+      extract-jsonpath:
+        first_order_id: $.orders[0].id
+        default: NOT_FOUND
+
+    - if: '"${first_order_id}" == "NOT_FOUND"'
+      then:
+        - action: continue
+
+    # 6. Delete Order
+    - url: /orders/${order_id}
+      label: order-delete
+      think-time: uniform(0s, 0s)
+      method: DELETE
+
+      assert:
+      - contains:
+        - 204
+        subject: http-code
+        not: false
+
+    # 7. Delete Product
     - url: /products/${product_id}
       label: product-delete
       think-time: uniform(0s, 0s)
@@ -121,7 +152,6 @@ scenarios:
         subject: http-code
         not: false
 
-  
 reporting:
 - module: final-stats
   dump-xml: stats.xml

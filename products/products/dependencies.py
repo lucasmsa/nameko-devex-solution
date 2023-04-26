@@ -3,7 +3,7 @@ from nameko import config
 from nameko.extensions import DependencyProvider
 import redis
 
-from products.exceptions import NotFound
+from products.exceptions import NotFound, Conflict
 
 
 REDIS_URI_KEY = 'REDIS_URI'
@@ -47,10 +47,8 @@ class StorageWrapper:
         else:
             return self._from_hash(product)
 
-    def list(self, product_ids=None, filter_title_term='', page=1, per_page=10):
-        keys = [self._format_key(product_id) for product_id in product_ids] \
-            if product_ids \
-                else self.client.keys(self._format_key('*'))
+    def list(self, filter_title_term='', page=1, per_page=10):
+        keys = self.client.keys(self._format_key('*'))
 
         filtered_keys = []
         if filter_title_term:
@@ -78,6 +76,9 @@ class StorageWrapper:
         return product_generator(), total_products
 
     def create(self, product):
+        if self.client.exists(self._format_key(product['id'])):
+            raise Conflict('Product ID {} already exists'.format(product['id']))
+        
         self.client.hmset(
             self._format_key(product['id']),
             product)

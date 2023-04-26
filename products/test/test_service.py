@@ -37,7 +37,7 @@ def test_list_products(products, service_container):
     with entrypoint_hook(service_container, 'list') as list_:
         listed_products = list_()
 
-    assert products == sorted(listed_products, key=lambda p: p['id'])
+    assert products == sorted(listed_products['products'], key=lambda p: p['id'])
 
 
 def test_list_productis_when_empty(service_container):
@@ -45,7 +45,7 @@ def test_list_productis_when_empty(service_container):
     with entrypoint_hook(service_container, 'list') as list_:
         listed_products = list_()
 
-    assert [] == listed_products
+    assert [] == listed_products['products']
 
 
 def test_create_product(product, redis_client, service_container):

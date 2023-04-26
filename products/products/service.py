@@ -20,8 +20,8 @@ class ProductsService:
         return schemas.Product().dump(product).data
 
     @rpc
-    def list(self, product_ids=None, filter_title_term='', page=1, per_page=10):
-        product_generator, total_products = self.storage.list(product_ids, filter_title_term, page, per_page)
+    def list(self, filter_title_term='', page=1, per_page=10):
+        product_generator, total_products = self.storage.list(filter_title_term, page, per_page)
         products = list(product_generator)
         return {
             'products': schemas.Product(many=True).dump(products).data,

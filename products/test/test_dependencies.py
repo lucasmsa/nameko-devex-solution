@@ -29,9 +29,14 @@ def test_get(storage, products):
 
 
 def test_list(storage, products):
-    listed_products = storage.list()
+    products_generator, _ = storage.list()
+    listed_products_response = list(products_generator)
+
+    sorted_response = sorted(listed_products_response, key=lambda x: x['id'])
+    sorted_products = sorted(products, key=lambda x: x['id'])
+    
     assert (
-        products == sorted(list(listed_products), key=lambda x: x['id']))
+        sorted_response == sorted_products)
 
 
 def test_create(product, redis_client, storage):
