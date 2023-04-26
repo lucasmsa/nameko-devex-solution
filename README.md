@@ -2,13 +2,9 @@
 
 ## ⚙️ How to run
 
----
-
 - Informations about how to run the project locally, as well as unit, smoke and performance tests and performance tests are inside the `README-DevEnv.md`
 
 ## ✏️ Implemented Tasks
-
----
 
 #### The files that were changed are on the `orders`, `products` and `gateway/gateway` folders, new routes, tests and extra functionalities were added to the application
 
@@ -36,6 +32,8 @@
 - [x]  Wire into [smoketest.sh](http://smoketest.sh/)
 - [x]  (bonus) Wire into perf-test
 - [x]  (bonus) Wire unit-test for this method
+
+---
 
 ### 🧪 Performance test questions
 
